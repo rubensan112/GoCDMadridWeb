@@ -3,18 +3,11 @@ format_version: 1
 environments:
   TASP_PRE:
     environment_variables:
-      TASP_DATABASE_NAME: alchemy
-      TASP_DATABASE_USER: alchemyuser
-      PGDATA: /var/lib/postgresql/data
-    secure_variables:
     pipelines:
-      - AlchemyProductionBuild
-      - AlchemyProductionDeploy
+      - VitaTestBuild
 pipelines:
-  AlchemyProductionBuild: # definition of yaml-example pipeline
-    group: Alchemy
-    label_template: "0.0.${COUNT}-${tasp[:7]}"
-    locking: off
+  VitaTestBuild: # definition of yaml-example pipeline
+    group: TestYaml
     materials:
       tasp: # this is the name of material
         # keyword git says about type of material and url at once
@@ -22,132 +15,10 @@ pipelines:
         branch: master
 
     stages: # list of stages in order
-      - Clean: # name of stage
-          clean_workspace: true
-          jobs:
-            DockerRemove: # name of the job
-              tasks: # ordered list of tasks to execute in job csharp
-                - script: |
-                    docker rm -f alchemy_frontend_prod
-                    docker rm -f alchemy_backend_prod
-                    docker rm -f alchemy_nginx
-                    docker rm -f postgres_portal
-                    true
-      - SetEnv: # name of stage
-          clean_workspace: false
-          jobs:
-            SetEnv: # name of the job
-              environment_variables:
-                    TASP_DATABASE_NAME: alchemy
-                    TASP_DATABASE_USER: alchemyuser
-                    TASP_SERVER_NSO: "https://10.30.191.33"
-                    TASP_PORT_NSO: 8888
-                    PGDATA: /var/lib/postgresql/data
-                    TASP_NSO_LOGIN_USER: wuxint01
-                    TASP_LDAP_ADMIN_USERNAME: "uid=oss-tasp,ou=LDAPGestionUser,o=TDC"
-                    TASP_LDAP_SERVER_HOST: "10.30.190.103"
-                    TASP_LDAP_SERVER_PORT: 50636
-                    TASP_LDAP_SEARCH_BASE: "ou=People,ou=users,o=TDC"
-
-              secure_variables:
-              tasks: # ordered list of tasks to execute in job csharp
-                - script: |
-                    mkdir -p .env
-                    touch .env/db.env
-                    touch .env/web.env
       - Build: # name of stage
           clean_workspace: false
           jobs:
             DockerBuild: # name of the job
               tasks:
                 - exec: # indicates type of task
-                   command: docker-compose
-                   arguments:
-                    - build
-                    - "--force-rm"
-                    - "--no-cache"
-      - Publish: # name of stage
-          clean_workspace: false
-          jobs:
-            DockerPush: # name of the job
-              tasks:
-                - exec: # indicates type of task
-                   command: docker-compose
-                   arguments:
-                    - push
-            NexusUpload: # name of the job
-              tasks:
-                - script: |
-                    tar -cvpzf alchemy.tar.gz --exclude=alchemy.tar.gz .
-                    curl -v -u alchemy_user:alchemy_user --upload-file alchemy.tar.gz https://portaldevops.heart.cic.wh.telefonica/nexus/repository/Alchemy/Build/latest/alchemy.tar.gz
-
-  AlchemyProductionDeploy: # definition of yaml-example pipeline
-    group: Alchemy
-    label_template: "${AlchemyProductionBuild}"
-    locking: off
-    materials:
-      AlchemyProductionBuild:
-        pipeline: AlchemyProductionBuild
-        stage: Publish
-
-    stages: # list of stages in order
-      - Clean: # name of stage
-          clean_workspace: true
-          jobs:
-            DockerRemove: # name of the job
-              tasks: # ordered list of tasks to execute in job csharp
-                - script: |
-                    docker rm -f alchemy_frontend_prod
-                    docker rm -f alchemy_backend_prod
-                    docker rm -f alchemy_nginx
-                    docker rm -f postgres_portal
-                    true
-      - Deploy: # name of stage
-          clean_workspace: false
-          jobs:
-            Deploy: # name of the job
-              environment_variables:
-                    TASP_DATABASE_NAME: alchemy
-                    TASP_DATABASE_USER: alchemyuser
-                    TASP_SERVER_NSO: "https://10.30.191.33"
-                    TASP_PORT_NSO: 8888
-                    PGDATA: /var/lib/postgresql/data
-                    TASP_LDAP_ADMIN_USERNAME: "uid=oss-tasp,ou=LDAPGestionUser,o=TDC"
-                    TASP_LDAP_SERVER_HOST: "10.30.190.103"
-                    TASP_LDAP_SERVER_PORT: 50636
-                    TASP_LDAP_SEARCH_BASE: "ou=People,ou=users,o=TDC"
-
-              secure_variables:
-              tasks: # ordered list of tasks to execute in job csharp
-
-                - script: |
-                    curl -X GET -u alchemy_user:alchemy_user https://portaldevops.heart.cic.wh.telefonica/nexus/repository/Alchemy/Build/latest/alchemy.tar.gz -O
-                    tar -xvf alchemy.tar.gz
-                - script: |
-                    mkdir -p .env
-                    touch .env/db.env
-                    touch .env/web.env
-                - exec: # indicates type of task
-                   command: docker-compose
-                   arguments:
-                    - up
-                    - "-d"
-                    - frontend
-                - exec: # indicates type of task
-                   command: docker
-                   arguments:
-                    - wait
-                    - alchemy_frontend_prod
-                - exec: # indicates type of task
-                   command: docker-compose
-                   arguments:
-                    - rm
-                    - "-f"
-                    - "-v"
-                    - frontend
-                - exec: # indicates type of task
-                   command: docker-compose
-                   arguments:
-                    - up
-                    - "-d"
-                    - application
+                   command: printenv
