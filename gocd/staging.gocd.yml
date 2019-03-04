@@ -3,22 +3,188 @@ format_version: 1
 environments:
   TASP_PRE:
     environment_variables:
+      TASP_DATABASE_NAME: alchemy
+      TASP_DATABASE_USER: alchemyuser
+      TASP_SERVER_NSO: "https://10.30.191.33"
+      TASP_PORT_NSO: 8888
+      PGDATA: /var/lib/postgresql/data
+    secure_variables:
+      TASP_DATABASE_PASSWORD: MjtUph8B1KohibV052ezeA==
+      TASP_SECRET_KEY: uGZtA4fRy44SqEY3OmaG+cKF1CEftW7OEjR4Vx54mmpjX0X9F294vg+yg3XgucQ19eLdMJiCHyI=
     pipelines:
-      - VitaTestBuild
+      - AlchemyProductionBuild
+      - AlchemyProductionDeploy
 pipelines:
-  VitaTestBuild: # definition of yaml-example pipeline
-    group: TestYaml
+  AlchemyProductionBuild: # definition of yaml-example pipeline
+    group: Alchemy
+    label_template: "0.0.${COUNT}-${tasp[:7]}"
+    locking: off
     materials:
       tasp: # this is the name of material
         # keyword git says about type of material and url at once
-        git: git@github.com:rubensan112/GoCDMadridWeb.git
-        branch: master
+        git: git@gitlab.heart.cic.wh.telefonica:OSS/TASP.git
+        branch: staging
 
     stages: # list of stages in order
+      - Clean: # name of stage
+          clean_workspace: true
+          jobs:
+            DockerRemove: # name of the job
+              tasks: # ordered list of tasks to execute in job csharp
+                - script: |
+                    docker rm -f alchemy_frontend_prod
+                    docker rm -f alchemy_backend_prod
+                    docker rm -f alchemy_nginx
+                    docker rm -f postgres_portal
+                    true
+      - SetEnv: # name of stage
+          clean_workspace: false
+          jobs:
+            SetEnv: # name of the job
+              environment_variables:
+                    TASP_DATABASE_NAME: alchemy
+                    TASP_DATABASE_USER: alchemyuser
+                    TASP_SERVER_NSO: "https://10.30.191.33"
+                    TASP_PORT_NSO: 8888
+                    PGDATA: /var/lib/postgresql/data
+                    TASP_NSO_LOGIN_USER: wuxint01
+                    TASP_NSO_LOGIN_PASS: fxErzd0QQILXYF1Joj43
+                    TASP_LDAP_ADMIN_USERNAME: "uid=oss-tasp,ou=LDAPGestionUser,o=TDC"
+                    TASP_LDAP_SERVER_HOST: "10.30.190.103"
+                    TASP_LDAP_SERVER_PORT: 50636
+                    TASP_LDAP_SEARCH_BASE: "ou=People,ou=users,o=TDC"
+
+              secure_variables:
+                    TASP_LDAP_ADMIN_PASSWORD: 7ftPE0gQztRdVN9pVHCX+g==
+                    TASP_DATABASE_PASSWORD: MjtUph8B1KohibV052ezeA==
+                    TASP_SECRET_KEY: uGZtA4fRy44SqEY3OmaG+cKF1CEftW7OEjR4Vx54mmpjX0X9F294vg+yg3XgucQ19eLdMJiCHyI=
+              tasks: # ordered list of tasks to execute in job csharp
+                - script: |
+                    mkdir -p .env
+                    touch .env/db.env
+                    touch .env/web.env
+                    echo TASP_LDAP_ADMIN_USERNAME=$TASP_LDAP_ADMIN_USERNAME >> .env/web.env
+                    echo TASP_LDAP_ADMIN_PASSWORD=$TASP_LDAP_ADMIN_PASSWORD >> .env/web.env
+                    echo TASP_LDAP_SERVER_HOST=$TASP_LDAP_SERVER_HOST >> .env/web.env
+                    echo TASP_LDAP_SERVER_PORT=$TASP_LDAP_SERVER_PORT >> .env/web.env
+                    echo TASP_LDAP_SEARCH_BASE=$TASP_LDAP_SEARCH_BASE >> .env/web.env
+                    echo TASP_DATABASE_NAME=$TASP_DATABASE_NAME >> .env/web.env
+                    echo TASP_DATABASE_USER=$TASP_DATABASE_USER >> .env/web.env
+                    echo TASP_DATABASE_PASSWORD=$TASP_DATABASE_PASSWORD >> .env/web.env
+                    echo TASP_SECRET_KEY=$TASP_SECRET_KEY >> .env/web.env
+                    echo TASP_SERVER_NSO=$TASP_SERVER_NSO >> .env/web.env
+                    echo TASP_PORT_NSO=$TASP_PORT_NSO >> .env/web.env
+                    echo NSO_LOGIN_USER=\'$TASP_NSO_LOGIN_USER\' >> settings/local_settings.py
+                    echo NSO_LOGIN_PASS=\'$TASP_NSO_LOGIN_PASS\' >> settings/local_settings.py
+                    echo PGDATA=$PGDATA >> .env/db.env
       - Build: # name of stage
           clean_workspace: false
           jobs:
             DockerBuild: # name of the job
               tasks:
                 - exec: # indicates type of task
-                   command: printenv
+                   command: docker-compose
+                   arguments:
+                    - build
+                    - "--force-rm"
+                    - "--no-cache"
+      - Publish: # name of stage
+          clean_workspace: false
+          jobs:
+            DockerPush: # name of the job
+              tasks:
+                - exec: # indicates type of task
+                   command: docker-compose
+                   arguments:
+                    - push
+            NexusUpload: # name of the job
+              tasks:
+                - script: |
+                    tar -cvpzf alchemy.tar.gz --exclude=alchemy.tar.gz .
+                    curl -v -u alchemy_user:alchemy_user --upload-file alchemy.tar.gz https://portaldevops.heart.cic.wh.telefonica/nexus/repository/Alchemy/Build/latest/alchemy.tar.gz
+
+  AlchemyProductionDeploy: # definition of yaml-example pipeline
+    group: Alchemy
+    label_template: "${AlchemyProductionBuild}"
+    locking: off
+    materials:
+      AlchemyProductionBuild:
+        pipeline: AlchemyProductionBuild
+        stage: Publish
+
+    stages: # list of stages in order
+      - Clean: # name of stage
+          clean_workspace: true
+          jobs:
+            DockerRemove: # name of the job
+              tasks: # ordered list of tasks to execute in job csharp
+                - script: |
+                    docker rm -f alchemy_frontend_prod
+                    docker rm -f alchemy_backend_prod
+                    docker rm -f alchemy_nginx
+                    docker rm -f postgres_portal
+                    true
+      - Deploy: # name of stage
+          clean_workspace: false
+          jobs:
+            Deploy: # name of the job
+              environment_variables:
+                    TASP_DATABASE_NAME: alchemy
+                    TASP_DATABASE_USER: alchemyuser
+                    TASP_SERVER_NSO: "https://10.30.191.33"
+                    TASP_PORT_NSO: 8888
+                    PGDATA: /var/lib/postgresql/data
+                    TASP_LDAP_ADMIN_USERNAME: "uid=oss-tasp,ou=LDAPGestionUser,o=TDC"
+                    TASP_LDAP_SERVER_HOST: "10.30.190.103"
+                    TASP_LDAP_SERVER_PORT: 50636
+                    TASP_LDAP_SEARCH_BASE: "ou=People,ou=users,o=TDC"
+
+              secure_variables:
+                    TASP_LDAP_ADMIN_PASSWORD: 7ftPE0gQztRdVN9pVHCX+g==
+                    TASP_DATABASE_PASSWORD: MjtUph8B1KohibV052ezeA==
+                    TASP_SECRET_KEY: uGZtA4fRy44SqEY3OmaG+cKF1CEftW7OEjR4Vx54mmpjX0X9F294vg+yg3XgucQ19eLdMJiCHyI=
+              tasks: # ordered list of tasks to execute in job csharp
+
+                - script: |
+                    curl -X GET -u alchemy_user:alchemy_user https://portaldevops.heart.cic.wh.telefonica/nexus/repository/Alchemy/Build/latest/alchemy.tar.gz -O
+                    tar -xvf alchemy.tar.gz
+                - script: |
+                    mkdir -p .env
+                    touch .env/db.env
+                    touch .env/web.env
+                    echo TASP_LDAP_ADMIN_USERNAME=$TASP_LDAP_ADMIN_USERNAME >> .env/web.env
+                    echo TASP_LDAP_ADMIN_PASSWORD=$TASP_LDAP_ADMIN_PASSWORD >> .env/web.env
+                    echo TASP_LDAP_SERVER_HOST=$TASP_LDAP_SERVER_HOST >> .env/web.env
+                    echo TASP_LDAP_SERVER_PORT=$TASP_LDAP_SERVER_PORT >> .env/web.env
+                    echo TASP_LDAP_SEARCH_BASE=$TASP_LDAP_SEARCH_BASE >> .env/web.env
+                    echo TASP_DATABASE_NAME=$TASP_DATABASE_NAME >> .env/web.env
+                    echo TASP_DATABASE_USER=$TASP_DATABASE_USER >> .env/web.env
+                    echo TASP_DATABASE_PASSWORD=$TASP_DATABASE_PASSWORD >> .env/web.env
+                    echo TASP_SECRET_KEY=$TASP_SECRET_KEY >> .env/web.env
+                    echo TASP_SERVER_NSO=$TASP_SERVER_NSO >> .env/web.env
+                    echo TASP_PORT_NSO=$TASP_PORT_NSO >> .env/web.env
+                    echo PGDATA=$PGDATA >> .env/db.env
+                - exec: # indicates type of task
+                   command: docker-compose
+                   arguments:
+                    - up
+                    - "-d"
+                    - frontend
+                - exec: # indicates type of task
+                   command: docker
+                   arguments:
+                    - wait
+                    - alchemy_frontend_prod
+                - exec: # indicates type of task
+                   command: docker-compose
+                   arguments:
+                    - rm
+                    - "-f"
+                    - "-v"
+                    - frontend
+                - exec: # indicates type of task
+                   command: docker-compose
+                   arguments:
+                    - up
+                    - "-d"
+                    - application
