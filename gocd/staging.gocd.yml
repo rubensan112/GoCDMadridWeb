@@ -5,8 +5,9 @@ environments:
     environment_variables:
     pipelines:
       - VitaTestBuild
+      - Testing
 pipelines:
-  VitaTestBuild: # definition of yaml-example pipeline
+  Testing: # definition of yaml-example pipeline
     group: TestYaml
     materials:
       tasp: # this is the name of material
@@ -22,3 +23,20 @@ pipelines:
               tasks:
                 - exec: # indicates type of task
                    command: printenv
+  VitaTestBuild: # definition of yaml-example pipeline
+    group: TestYaml
+    materials:
+      tasp: # this is the name of material
+        # keyword git says about type of material and url at once
+        git: git@github.com:rubensan112/GoCDMadridWeb.git
+        branch: master
+
+    stages: # list of stages in order
+      - Build: # name of stage
+          clean_workspace: false
+          jobs:
+            DockerBuild: # name of the job
+              tasks:
+                - script: |
+                    docker image ls
+
