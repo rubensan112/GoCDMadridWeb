@@ -5,8 +5,6 @@ environments:
     environment_variables:
       TASP_DATABASE_NAME: alchemy
       TASP_DATABASE_USER: alchemyuser
-      TASP_SERVER_NSO: "https://10.30.191.33"
-      TASP_PORT_NSO: 8888
       PGDATA: /var/lib/postgresql/data
     secure_variables:
     pipelines:
@@ -20,8 +18,8 @@ pipelines:
     materials:
       tasp: # this is the name of material
         # keyword git says about type of material and url at once
-        git: git@gitlab.heart.cic.wh.telefonica:OSS/TASP.git
-        branch: staging
+        git: git@github.com:rubensan112/GoCDMadridWeb.git
+        branch: master
 
     stages: # list of stages in order
       - Clean: # name of stage
