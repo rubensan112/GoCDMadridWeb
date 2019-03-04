@@ -6,7 +6,7 @@ environments:
     pipelines:
       - VitaTestBuild
 pipelines:
-  VitaTestPipline: # definition of yaml-example pipeline
+  VitaTestBuild: # definition of yaml-example pipeline
     group: TestYaml
     materials:
       tasp: # this is the name of material
