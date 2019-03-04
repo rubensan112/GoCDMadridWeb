@@ -37,6 +37,9 @@ pipelines:
           jobs:
             DockerBuild: # name of the job
               tasks:
-                - script: |
-                    docker image ls
+                - exec: # indicates type of task
+                   command: docker
+                   arguments:
+                    - image
+                    - ls
 
