@@ -23,7 +23,7 @@ pipelines:
               tasks:
                 - exec: # indicates type of task
                    command: printenv
-  VitaTestBuild: # definition of yaml-example pipeline
+  VitaTestBuild1: # definition of yaml-example pipeline
     group: TestYaml
     materials:
       tasp: # this is the name of material
@@ -35,7 +35,7 @@ pipelines:
       - Build: # name of stage
           clean_workspace: false
           jobs:
-            DockerBuild1: # name of the job
+            DockerBuild: # name of the job
               tasks:
                 - exec: # indicates type of task
                     command: ls
