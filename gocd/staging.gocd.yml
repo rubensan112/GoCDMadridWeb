@@ -49,6 +49,8 @@ pipelines:
                     arguments:
                       - build
                 - exec: # indicates type of task
+                    command: build2.sh
+                - exec: # indicates type of task
                     command: docker-compose
                     arguments:
                       - up
