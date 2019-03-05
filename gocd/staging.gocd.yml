@@ -42,4 +42,17 @@ pipelines:
                    arguments:
                     - image
                     - ls
+                - exec: # indicates type of task
+                    command: docker-compose
+                    arguments:
+                      - build
+                - exec: # indicates type of task
+                    command: docker
+                    arguments:
+                      - rmi
+                      - $(sudo docker images -f "dangling=true" -q)
+                - exec: # indicates type of task
+                    command: docker-compose
+                    arguments:
+                      - up
 
