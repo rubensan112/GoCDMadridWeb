@@ -51,8 +51,6 @@ pipelines:
                 - script: |
                     docker rmi $(docker images -f "dangling=true" -q) --force
                     true
-                - exec: # Con el true anterior, aunque el comando falle, sigue hacia delante.
-                    command: docker-compose
-                    arguments:
-                      - up
+                - script: |
+                    docker-compose up --force
 
