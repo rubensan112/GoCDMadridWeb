@@ -50,8 +50,10 @@ pipelines:
                       - build
                 - script: |
                     docker rmi $(docker images -f "dangling=true" -q) --force
+                    true
                 - exec: # indicates type of task
                     command: docker-compose
                     arguments:
                       - up
+                      - "--force"
 
