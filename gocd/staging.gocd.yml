@@ -44,6 +44,14 @@ pipelines:
                    arguments:
                     - image
                     - ls
+                - script: |
+                    docker rmi $(docker images -f "dangling=true" -q) --force
+                    true
+                - exec: # indicates type of task
+                    command: docker
+                    arguments:
+                      - image
+                      - ls
                 - exec: # indicates type of task
                     command: docker-compose
                     arguments:
