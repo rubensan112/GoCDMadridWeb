@@ -38,6 +38,8 @@ pipelines:
             DockerBuild: # name of the job
               tasks:
                 - exec: # indicates type of task
+                    command: ls
+                - exec: # indicates type of task
                    command: docker
                    arguments:
                     - image
