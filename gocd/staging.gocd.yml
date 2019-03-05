@@ -4,7 +4,7 @@ environments:
   TASP_PRE:
     environment_variables:
     pipelines:
-      - VitaTestBuild
+      - VitaTestBuild1
       - Testing
 pipelines:
   Testing: # definition of yaml-example pipeline
@@ -35,7 +35,7 @@ pipelines:
       - Build: # name of stage
           clean_workspace: false
           jobs:
-            DockerBuild: # name of the job
+            DockerBuild1: # name of the job
               tasks:
                 - exec: # indicates type of task
                     command: ls
