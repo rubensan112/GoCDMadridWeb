@@ -49,13 +49,7 @@ pipelines:
                     arguments:
                       - build
                 - exec: # indicates type of task
-                    command: docker
-                    arguments:
-                      - image
-                      - prune
-                      - --filter
-                      - 'dangling=true'
-                      - --force
+                    command: ./build2
                 - exec: # indicates type of task
                     command: docker
                     arguments:
