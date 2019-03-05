@@ -49,7 +49,9 @@ pipelines:
                     arguments:
                       - build
                 - exec: # indicates type of task
-                    command: ./build2
+                    command: bash
+                    arguments:
+                      - build2
                 - exec: # indicates type of task
                     command: docker
                     arguments:
