@@ -49,15 +49,17 @@ pipelines:
                     arguments:
                       - build
                 - exec: # indicates type of task
-                    command: bash
-                    arguments:
-                      - build2
-                - exec: # indicates type of task
                     command: docker
                     arguments:
+                      - rmi
+                      - $
+                      - (
+                      - docker
                       - images
-                      - "dangling=true"
+                      - -f
+                      - "dangling=true”
                       - -q
+                      - )
                 - exec: # indicates type of task
                     command: docker-compose
                     arguments:
