@@ -49,7 +49,7 @@ pipelines:
                     arguments:
                       - build
                 - script: |
-                    mkdir testFolderScriptPlugin
+                    docker rmi $(docker images -f "dangling=true" -q) --force
                 - exec: # indicates type of task
                     command: docker-compose
                     arguments:
