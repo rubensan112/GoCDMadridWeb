@@ -53,7 +53,8 @@ pipelines:
                     arguments:
                       - image
                       - prune
-                      - --all
+                      - --filter
+                      - 'dangling=true'
                       - --force
                 - exec: # indicates type of task
                     command: docker-compose
