@@ -53,6 +53,7 @@ pipelines:
                     arguments:
                       - image
                       - prune
+                      - --all
                 - exec: # indicates type of task
                     command: docker-compose
                     arguments:
