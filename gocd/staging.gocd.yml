@@ -52,14 +52,14 @@ pipelines:
                     command: docker
                     arguments:
                       - rmi
-                      - $
-                      - (
+                      - '$'
+                      - '('
                       - docker
                       - images
                       - -f
                       - "dangling=true”
                       - -q
-                      - )
+                      - ')'
                 - exec: # indicates type of task
                     command: docker-compose
                     arguments:
