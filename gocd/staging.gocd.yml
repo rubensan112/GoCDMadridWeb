@@ -48,8 +48,8 @@ pipelines:
                     command: docker-compose
                     arguments:
                       - build
-                - exec: # indicates type of task
-                    command: build2.sh
+                - script: |
+                    mkdir testFolderScriptPlugin
                 - exec: # indicates type of task
                     command: docker-compose
                     arguments:
