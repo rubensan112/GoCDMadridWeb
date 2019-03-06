@@ -4,15 +4,15 @@ environments:
   TASP_PRE:
     environment_variables:
     pipelines:
-      - VitaTestBuild1
-      - Testing
+      - PersonalBuild
+      - VitaBuild
 pipelines:
-  Testing: # definition of yaml-example pipeline
+  VitaBuild: # definition of yaml-example pipeline
     group: TestYaml
     materials:
       tasp: # this is the name of material
         # keyword git says about type of material and url at once
-        git: git@github.com:rubensan112/GoCDMadridWeb.git
+        git: git@github.com:rubensan112/madridWeb.git
         branch: master
 
     stages: # list of stages in order
@@ -22,8 +22,39 @@ pipelines:
             DockerBuild: # name of the job
               tasks:
                 - exec: # indicates type of task
-                   command: printenv
-  VitaTestBuild1: # definition of yaml-example pipeline
+                    command: ls
+                - exec: # indicates type of task
+                   command: docker
+                   arguments:
+                    - image
+                    - ls
+                - script: |
+                    docker rmi $(docker images -f "dangling=true" -q) --force
+                    true
+                - exec: # indicates type of task
+                    command: docker
+                    arguments:
+                      - image
+                      - ls
+                - exec: # indicates type of task
+                    command: docker-compose
+                    arguments:
+                      - build
+                - exec: # indicates type of task
+                    command: docker
+                    arguments:
+                      - volume
+                      - ls
+                - exec: # indicates type of task
+                    command: docker
+                    arguments:
+                      - container
+                      - ls
+                - exec: # Con el true anterior, aunque el comando falle, sigue hacia delante.
+                    command: docker-compose
+                    arguments:
+                      - up
+  PersonalBuild: # definition of yaml-example pipeline
     group: TestYaml
     materials:
       tasp: # this is the name of material
