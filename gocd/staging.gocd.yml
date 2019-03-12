@@ -59,7 +59,7 @@ pipelines:
                     sleep 2
                     kubectl create -f django/service.yaml
 
-  VitaDeploy: # definition of yaml-example pipeline
+  VitaDeployRebuild: # definition of yaml-example pipeline
     group: TestYaml
     materials:
       tasp: # this is the name of material
