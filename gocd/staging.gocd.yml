@@ -13,7 +13,7 @@ pipelines:
     materials:
       tasp: # this is the name of material
         # keyword git says about type of material and url at once
-        git: git@github.com:rubensan112/kubernetesMadridWeb.git #No seria necesario traer el codigo entero.
+        git: git@github.com:rubensan112/madridWeb.git #No seria necesario traer el codigo entero.
         branch: master
 
     stages: # list of stages in order
