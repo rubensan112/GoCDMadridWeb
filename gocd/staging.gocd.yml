@@ -1,7 +1,7 @@
 #staging.gocd.yaml
 format_version: 1
 environments:
-  VITA_TEST:
+  TASP_PRE:
     environment_variables:
     pipelines:
       - VitaDeployNoRebuild
