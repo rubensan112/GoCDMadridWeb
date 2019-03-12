@@ -22,6 +22,8 @@ pipelines:
           jobs:
             DockerBuild: # name of the job
               tasks:
+                - script: |
+                    minikube ssh
                 - exec: # indicates type of task
                     command: ls
                 - exec: # indicates type of task
@@ -68,6 +70,7 @@ pipelines:
                     kubectl create -f django/deployment.yaml
                     sleep 2
                     kubectl create -f django/service.yaml
+                    minikube service list
 
   VitaDeployNoRebuild: # definition of yaml-example pipeline
     group: TestYaml
@@ -92,4 +95,5 @@ pipelines:
                     kubectl create -f django/job-migrations.yaml
                     sleep 3
                     kubectl create -f django/service.yaml
+                    minikube service list
 
