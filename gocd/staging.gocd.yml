@@ -5,10 +5,10 @@ environments:
     environment_variables:
     pipelines:
       - VitaDeployNoRebuild
-      - VitaRebuild
+      - VitaRebuild1
       - VitaDeployFull
 pipelines:
-  VitaRebuild: # definition of yaml-example pipeline
+  VitaRebuild1: # definition of yaml-example pipeline
     group: TestYaml
     materials:
       tasp: # this is the name of material
