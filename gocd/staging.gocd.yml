@@ -24,6 +24,7 @@ pipelines:
               tasks:
                 - script: |
                     minikube ssh
+                    docker image ls
                 - exec: # indicates type of task
                     command: ls
                 - exec: # indicates type of task
