@@ -22,9 +22,6 @@ pipelines:
           jobs:
             DockerBuild: # name of the job
               tasks:
-                - script: |
-                    minikube ssh
-                    docker image ls
                 - exec: # indicates type of task
                     command: ls
                 - exec: # indicates type of task
@@ -44,6 +41,10 @@ pipelines:
                     command: docker-compose
                     arguments:
                       - build
+                - exec: # indicates type of task
+                    command: docker-compose
+                    arguments:
+                      - push
   VitaDeployFull: # definition of yaml-example pipeline
     group: TestYaml
     materials:
